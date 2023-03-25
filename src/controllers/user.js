@@ -1,10 +1,10 @@
 import axios from "axios";
 const API_URI = "http://localhost:3001/users/";
 
-// const userVali = joi.object({
-//   name: joi.string().required(),
-//   email: joi.string().required(),
-// });
+const userVali = joi.object({
+  name: joi.string().required(),
+  email: joi.string().required(),
+});
 
 import dotenv from "dotenv"
 dotenv.config()

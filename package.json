@@ -5,9 +5,7 @@
   "main": "src/app.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon app.js",
-    "server": "json-server --watch db.json --port 3001",
-    "dev": "concurrently \"npm run server\" \"npm run start\""
+    "dev": "vite"
   },
   "repository": {
     "type": "git",
