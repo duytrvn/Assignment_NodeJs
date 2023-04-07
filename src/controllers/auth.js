@@ -1,93 +1,100 @@
+import User from "../models/user";
+import { signinSchema, signupSchema } from "../schemas/auth";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-import User from "../models/user";
-import dotenv from "dotenv";
-
-dotenv.config();
-import { signinSchema, signupSchema } from "../schemas/auth";
-
 export const signup = async (req, res) => {
     try {
-        const { name, email, password, confirmPassword } = req.body;
         const { error } = signupSchema.validate(req.body, { abortEarly: false });
 
         if (error) {
             const errors = error.details.map((err) => err.message);
+            // ['Trường tên là bắt buộc', 'Email không đúng định dạng']
             return res.status(400).json({
-                message: errors,
+                messsages: errors,
             });
         }
-
-        // kiểm tra tồn tại email
-
-        const userExist = await User.findOne({ email });
+        const userExist = await User.findOne({ email: req.body.email });
         if (userExist) {
             return res.status(400).json({
                 message: "Email đã tồn tại",
             });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
         const user = await User.create({
-            name,
-            email,
+            name: req.body.name,
+            email: req.body.email,
             password: hashedPassword,
         });
 
-        user.password = undefined;
-        // tạo token từ server
-        const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, { expiresIn: 60 * 60 });
+        const accessToken = jwt.sign({ _id: user._id }, "banThayDat", { expiresIn: "1d" });
+
         return res.status(201).json({
-            message: "Đăng ký thành công",
-            accessToken: token,
+            message: "Đăng ký tk thành công",
+            accessToken,
             user,
         });
-    } catch (error) {}
+    } catch (error) {
+        return res.status(400).json({
+            message: error,
+        });
+    }
 };
 
+// B1: Validate object từ client gửi lên(name, email, password, confirmPassword)
+// B2: Kiểm tra email đã tồn tại chưa(Nếu mà có rồi thì trả về lỗi: Email đã tồn tại)
+// B3: Mã hóa mật khẩu
+// B4: Tạo user mới
+// B5: Tạo token
+// B6: Trả về token và user
 export const signin = async (req, res) => {
     try {
         const { email, password } = req.body;
         const { error } = signinSchema.validate(req.body, { abortEarly: false });
-
         if (error) {
             const errors = error.details.map((err) => err.message);
             return res.status(400).json({
-                message: errors,
+                messages: errors,
             });
         }
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({
-                message: "Tài khoản không tồn tại",
+                message: "Bạn chưa đăng ký tài khoản",
             });
         }
-        // nó vừa mã hóa và vừa so sánh
+
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             return res.status(400).json({
-                message: "Sai mật khẩu",
+                message: "Mật khẩu không đúng",
             });
         }
 
-        user.password = undefined;
-        // tạo token từ server
-        const token = jwt.sign({ _id: user._id }, process.env.SECRET_KEY, { expiresIn: 60 * 60 });
+        const accessToken = jwt.sign({ _id: user._id }, "banThayDat", { expiresIn: "1d" });
 
         return res.status(201).json({
-            message: "Đăng nhập thành công",
-            accessToken: token,
+            message: "Đăng ký tk thành công",
+            accessToken,
             user,
         });
-    } catch (error) {}
+    } catch (error) {
+        return res.status(400).json({
+            message: error,
+        });
+    }
 };
+// B1: Validate object từ client gửi lên(email, password)
+// B2: Kiểm tra email đã tồn tại chưa (Nếu không có thì trả về lỗi: Bạn chưa đăng ký tài khoản)
+// B3: So sánh giá trị(password) từ client nó giống với password ở db không?
+// B4: Tạo token
+// B5: Trả về token và user
 
-/**
- * Bước 1: Nhận request từ client gửi lên
- * Bước 2: Kiểm tra cú pháp của request
- * Bước 3: Kiểm tra xem email đã tồn tại trong db chưa? nếu tồn tại thì trả về thông báo
- * Bước 4: So sánh mật khẩu từ client gửi lên với mật khẩu trong db
- * Bước 5: Nếu mật khẩu không khớp thì trả về thông báo
- * Bước 6: Tạo token và trả về client bao gồm thông tin user và token
- */
+// Nhìn
+// Hiểu
+// ---- Giải thích từng bước 1
+// Nhớ
+// Code lại
+// Repeat
