@@ -76,7 +76,7 @@ export const signin = async (req, res) => {
         const accessToken = jwt.sign({ _id: user._id }, "banThayDat", { expiresIn: "1d" });
 
         return res.status(201).json({
-            message: "Đăng ký tk thành công",
+            message: "Đăng nhập tk thành công",
             accessToken,
             user,
         });

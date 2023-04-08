@@ -1,10 +1,10 @@
 import Category from "../models/category";
 import Joi from "joi";
 import Product from "../models/product";
-
-const categorySchema = Joi.object({
-    name: Joi.string().required(),
-});
+import { categorySchema } from "../schemas/category";
+// const categorySchema = Joi.object({
+//     name: Joi.string().required(),
+// });
 export const getAll = async function (req, res) {
     try {
         const categories = await Category.find();
